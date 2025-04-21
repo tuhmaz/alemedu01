@@ -17,6 +17,7 @@
     "guzzlehttp/guzzle": "^7.8",
     "intervention/image": "^2.7",
     "jaybizzle/crawler-detect": "^1.2",
+    "laravel/fortify": "^1.25",
     "laravel/framework": "^11.0",
     "laravel/jetstream": "^5.3",
     "laravel/passport": "^12.0",
@@ -46,7 +47,6 @@
     "symfony/process": "^7.0",
     "yajra/laravel-datatables-oracle": "^11.1"
   },
-  "require-dev": {},
   "autoload": {
     "psr-4": {
       "App\\": "app/",
