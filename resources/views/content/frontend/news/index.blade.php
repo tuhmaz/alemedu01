@@ -157,7 +157,7 @@ use Illuminate\Support\Str;
 @endpush
 
 @push('page-script')
-@vite(['resources/js/pages/news.js'])
+@vite(['resources/assets/js/pages/news.js'])
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const filterUrl = '{{ $filterUrl }}';

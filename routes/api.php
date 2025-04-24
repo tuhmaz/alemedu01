@@ -23,6 +23,7 @@ Route::middleware(['api', 'App\Http\Middleware\ApiProtection'])->group(function 
     // Social Auth Routes
     Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle']);
     Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+    Route::post('login/google', [SocialAuthController::class, 'loginWithGoogle']);
     
     // Lesson Routes (Public)
     Route::get('{country}/lesson', [GradeController::class, 'index']);
@@ -124,6 +125,8 @@ Route::middleware(['api', 'throttle:60,1'])->prefix('{database}')->group(functio
                 ->name('api.dashboard.messages.index');
             Route::post('/', [App\Http\Controllers\Api\MessageController::class, 'store'])
                 ->name('api.dashboard.messages.store');
+            Route::post('/send', [App\Http\Controllers\Api\MessageController::class, 'store'])
+                ->name('api.dashboard.messages.send');
             Route::get('/sent', [App\Http\Controllers\Api\MessageController::class, 'sent'])
                 ->name('api.dashboard.messages.sent');
             Route::get('/{id}', [App\Http\Controllers\Api\MessageController::class, 'show'])

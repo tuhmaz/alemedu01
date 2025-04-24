@@ -101,6 +101,16 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->last_activity = now();
         $this->save();
     }
+    
+    /**
+     * الحصول على رابط الصورة الشخصية للمستخدم (للتوافق مع الواجهات القديمة)
+     *
+     * @return string
+     */
+    public function getAvatarUrl()
+    {
+        return $this->profile_photo_url;
+    }
 
     /**
      * الحقول التي يمكن تعبئتها جماعياً

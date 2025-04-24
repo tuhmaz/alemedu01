@@ -449,33 +449,102 @@ class AuthController extends Controller
     public function googleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            // Log the beginning of the callback process
+            Log::info('Google callback initiated', ['request_data' => request()->all()]);
             
+            // Get the Google user - use stateless to avoid session issues
+            $googleUser = Socialite::driver('google')->stateless()->user();
+            
+            // Log successful retrieval of Google user data
+            Log::info('Google user data retrieved', [
+                'google_id' => $googleUser->id,
+                'email' => $googleUser->email,
+                'name' => $googleUser->name
+            ]);
+            
+            // Check if user exists
             $user = User::where('email', $googleUser->email)->first();
 
             if (!$user) {
                 // Create a new user
-                $user = User::create([
+                Log::info('Creating new user from Google login', ['email' => $googleUser->email]);
+                
+                // Prepare user data with required fields
+                $userData = [
                     'name' => $googleUser->name,
                     'email' => $googleUser->email,
                     'password' => Hash::make(Str::random(24)),
-                    'email_verified_at' => now(),
+                    'email_verified_at' => now(), // تعيين وقت التحقق من البريد الآن
                     'google_id' => $googleUser->id,
-                    'avatar' => $googleUser->avatar
-                ]);
+                ];
+                
+                // Add profile photo only if it exists
+                if (!empty($googleUser->avatar)) {
+                    $userData['profile_photo_path'] = $googleUser->avatar;
+                }
+                
+                // Create user with required fields
+                $user = User::create($userData);
+                
+                // Verify role exists before assigning
+                try {
+                    $user->assignRole('User');
+                    Log::info('Role assigned to new user', ['user_id' => $user->id, 'role' => 'User']);
+                } catch (\Exception $roleException) {
+                    Log::warning('Could not assign role to user', [
+                        'user_id' => $user->id, 
+                        'error' => $roleException->getMessage()
+                    ]);
+                    // Continue without role if it fails
+                }
+                
+                Log::info('New user created from Google login', ['user_id' => $user->id]);
             } else {
                 // Update existing user's Google ID and avatar if not set
-                $user->update([
-                    'google_id' => $googleUser->id,
-                    'avatar' => $googleUser->avatar
-                ]);
+                Log::info('Updating existing user from Google login', ['user_id' => $user->id]);
+                
+                $updateData = ['google_id' => $googleUser->id];
+                
+                // Add profile photo only if it exists
+                if (!empty($googleUser->avatar)) {
+                    $updateData['profile_photo_path'] = $googleUser->avatar;
+                }
+                
+                $user->update($updateData);
             }
 
+            // تأكيد البريد الإلكتروني إذا لم يكن مؤكداً بالفعل
+            if (!$user->hasVerifiedEmail()) {
+                $user->forceFill([
+                    'email_verified_at' => now()
+                ])->save();
+                
+                // منع إرسال إشعار التحقق
+                $user->setRememberToken(Str::random(60));
+                
+                Log::info('Email automatically verified for Google user', ['user_id' => $user->id]);
+            }
+            
+            // تسجيل دخول المستخدم
             Auth::login($user);
+            Log::info('User logged in via Google', ['user_id' => $user->id]);
 
+            // Redirect to dashboard
             return redirect()->intended('/dashboard');
 
         } catch (\Exception $e) {
+            // Log the error with detailed information
+            Log::error('Google login failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => request()->all(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
+            // For debugging in production, you can temporarily display the actual error
+            // return response()->json(['error' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], 500);
+            
             return redirect()->route('login')
                 ->with('error', 'حدث خطأ أثناء تسجيل الدخول باستخدام Google. الرجاء المحاولة مرة أخرى.');
         }
