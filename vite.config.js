@@ -90,7 +90,7 @@ export default defineConfig({
         'resources/assets/css/pages/performance.css',
         'resources/assets/js/pages/performance-metrics.js',
         'resources/assets/js/pages/news.js',
-        'resources/js/pages/news.js',
+       
         'resources/css/pages/dashboard.css',
         'resources/assets/css/pages/about-us.css',
         'resources/assets/js/pages/userlist.js',
