@@ -19,7 +19,10 @@ class UpdateUserStatus
         // تحديث سجل الزيارة
         VisitorTracking::updateOrCreate(
             ['user_id' => $user->id],
-            ['last_activity' => now()]
+            [
+                'ip_address' => request()->ip() ?? '127.0.0.1',
+                'last_activity' => now()
+            ]
         );
     }
 

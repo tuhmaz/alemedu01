@@ -1,6 +1,12 @@
 @foreach($users as $user)
 <tr>
     <td>
+        <div class="form-check">
+            <input class="form-check-input user-select-checkbox" type="checkbox" id="user-{{ $user->id }}" value="{{ $user->id }}">
+            <label class="form-check-label" for="user-{{ $user->id }}"></label>
+        </div>
+    </td>
+    <td>
         <div class="d-flex justify-content-start align-items-center user-name">
             <div class="avatar-wrapper">
                 <div class="avatar avatar-sm me-3">

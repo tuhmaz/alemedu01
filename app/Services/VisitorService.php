@@ -246,6 +246,28 @@ class VisitorService
                 return $cachedLocation;
             }
 
+            // التحقق مما إذا كان عنوان IPv6
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                // تحويل عنوان IPv6 إلى IPv4 إذا كان ذلك ممكنًا (للعناوين المزدوجة)
+                if (preg_match('/^::ffff:(\d+\.\d+\.\d+\.\d+)$/', $ip, $matches)) {
+                    $ip = $matches[1]; // استخراج عنوان IPv4 المضمن
+                } else {
+                    // إذا كان عنوان IPv6 حقيقي، استخدم IP افتراضي للبلد
+                    // يمكننا استخدام خدمة أخرى تدعم IPv6 في المستقبل
+                    $data = [
+                        'country' => 'Unknown',
+                        'city'    => 'Unknown',
+                        'lat'     => null,
+                        'lon'     => null,
+                    ];
+                    
+                    // تخزين البيانات في الكاش لمدة يوم
+                    Cache::put('geo_ip_' . $ip, $data, 86400);
+                    
+                    return $data;
+                }
+            }
+
             // استدعاء خدمة geoplugin.net المجانية باستخدام cURL بدلاً من file_get_contents
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, 'http://www.geoplugin.net/json.gp?ip=' . $ip);

@@ -184,6 +184,7 @@ Route::middleware(['auth', 'verified'])
         Route::get('users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::delete('users/destroy-multiple', [UserController::class, 'destroyMultiple'])->name('users.destroy-multiple');
     });
     
     // مسارات يمكن للمستخدم العادي الوصول إليها (للملف الشخصي)

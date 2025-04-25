@@ -276,4 +276,48 @@ class UserController extends Controller
             return redirect()->route('dashboard.users.index')->with('error', 'Error deleting user. Please try again.');
         }
     }
+    
+    public function destroyMultiple(Request $request)
+    {
+        $ids = $request->ids;
+        
+        if (empty($ids)) {
+            return redirect()->route('dashboard.users.index')->with('error', 'No users selected.');
+        }
+        
+        DB::beginTransaction();
+        
+        try {
+            $users = User::whereIn('id', $ids)->get();
+            
+            foreach ($users as $user) {
+                // Delete profile photo if exists
+                if ($user->profile_photo_path) {
+                    Storage::delete($user->profile_photo_path);
+                }
+                
+                // Remove roles and permissions
+                $user->roles()->detach();
+                $user->permissions()->detach();
+                
+                // Delete the user
+                $user->delete();
+                
+                // Log the deletion
+                activity()
+                    ->causedBy(auth()->user())
+                    ->log("Deleted user '{$user->name}'");
+            }
+            
+            DB::commit();
+            
+            return redirect()->route('dashboard.users.index')
+                ->with('success', count($users) . ' users deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting multiple users: ' . $e->getMessage());
+            return redirect()->route('dashboard.users.index')
+                ->with('error', 'Error deleting users. Please try again.');
+        }
+    }
 }

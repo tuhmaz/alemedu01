@@ -17,6 +17,13 @@ $contentLayout = (isset($container) ? (($container === 'container-xxl') ? "layou
   <meta http-equiv="Cache-Control" content="public, max-age=31536000">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
+  <!-- Favicon -->
+  @if(config('settings.site_favicon'))
+  <link rel="icon" type="image/png" href="{{ asset('storage/' . config('settings.site_favicon')) }}">
+  <link rel="shortcut icon" type="image/png" href="{{ asset('storage/' . config('settings.site_favicon')) }}">
+  <link rel="apple-touch-icon" href="{{ asset('storage/' . config('settings.site_favicon')) }}">
+  @endif
+
   @if(isset($noindex) && $noindex)
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">

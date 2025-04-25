@@ -89,7 +89,8 @@
                     <input type="file" class="form-control" name="site_favicon" accept="image/*">
                     @if($settings['site_favicon'])
                     <div class="mt-2">
-                      <img src="{{ asset('storage/' . $settings['site_favicon']) }}" alt="Site Favicon" class="img-thumbnail" style="max-height: 100px">
+                      <img src="{{ asset('storage/' . $settings['site_favicon']) }}" alt="Site Favicon" class="img-thumbnail" style="max-height: 50px; max-width: 50px;">
+                      <small class="d-block text-muted mt-1">{{ __('favicon') }}</small>
                     </div>
                     @endif
                   </div>
